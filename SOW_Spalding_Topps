@@ -1,0 +1,73 @@
+Project Title: Tic-Tac-Toe Client-Server Game 
+
+Team: Reagan Topps and Shea Spalding  
+
+Project Objective: Create a working Tic-Tac-Toe where one person plays as the host/server and the other plays as the client. To create a working model of Tic-Tac-Toe with X’s and O’s. 
+
+Scope: 
+
+Inclusions: 
+
+    We will break this down into multiple tasks/epics in our sprints. Roughly thinking we will likely need some client, server, and backend/game code between the two and bridging them through the use of sockets and other connection methods. 
+
+Exclusions: 
+
+    Unsure about these currently but we will implement the required tasks with a working client-server TTT game. 
+
+Deliverables: 
+
+    Working python client and server connection that can run a python TTT executable. 
+
+Timeline: 
+
+Key Milestones: 
+
+    Set up client and server connection through sockets so they are able to communicate. Implement the required code for one side X’s then the other of O’s. Once this is setup we will break it down into setting up one thing at a time. We will likely need to meet and discuss once we start attacking these and laying out objectives per sprint. 
+
+Task Breakdown: 
+
+    Very high level view (GitHub will have smaller tasks)  
+
+    Create server code 
+
+    Create client code 
+
+    Sync/communication between the two 
+
+    X’s side 
+
+    0’s side 
+
+    Help menu 
+
+    Info menu 
+
+    Game functions/rules 
+
+Technical Requirements: 
+
+Hardware: 
+
+    This should easily run on a simple server and client through the use of the CS linux machines. 
+
+Software: 
+
+    We will write this on linux  OS with Vscode and we will likely need to implement sockets through python and set it up that way. 
+
+Assumptions: 
+
+    Assuming we have cs linux machines to use.  
+
+Roles and Responsibilities: 
+
+    50/50 between me and Shea. We will both oversee different tasks/areas and check each other. We will both run our side of things as it is only two of us.  
+
+Communication Plan: 
+
+    We will need to communicate over email, possibly teams, and maybe in person if it comes to it. We can also utilize github for less urgent communication. 
+
+Additional Notes: 
+
+    We are both online students so discussing this has not been the smoothest/easiest but we will both likely run an untraditional method of going 50/50 on code dev and management. 
+
+ 
