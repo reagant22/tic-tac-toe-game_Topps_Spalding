@@ -15,3 +15,7 @@ This is a simple Tic-Tac-Toe game implemented using Python and sockets.
 **Additional resources:**
 * [Link to Python documentation]
 * [Link to sockets tutorial]
+
+
+**Sprint One
+Implementing Client and server services.
