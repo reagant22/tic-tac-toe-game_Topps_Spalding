@@ -23,22 +23,12 @@ def start_client(server_host='127.0.0.1', server_port=65432):
             message = input("Enter a message (or 'exit' to quit): ")
             if message.lower() == 'exit':
                 break
-            if not message: #validating no message
-                logging.warning("Message cannot be empty")
-                continue
             
             client_socket.send(message.encode('utf-8'))
-            try:
-                response = client_socket.recv(1024).decode('utf-8')
-                logging.info(f"Received from server: {response}")
-            except socket.timeout:
-                logging.info("Connection timed out waiting for a response")
-            except Exception as e:
-                logging.error(f"Error receiving response: {e}")
-    except KeyboardInterrupt:  # Catch the interrupt signal
-        logging.info("Client exiting...")
+            response = client_socket.recv(1024).decode('utf-8')
+            logging.info(f"Received from server: {response}")
     except Exception as e:
-        logging.error(f"Error: {e}")         
+        logging.error(f"Error: {e}")
     finally:
         client_socket.close()
         logging.info("Client disconnected.")
