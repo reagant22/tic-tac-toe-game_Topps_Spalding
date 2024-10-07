@@ -19,3 +19,5 @@ This is a simple Tic-Tac-Toe game implemented using Python and sockets.
 
 **Sprint One
 Implementing Client and server services.
+
+Start server by running python/python3 server.py then run python/python3 client.py the test case for this will auto generate a response for you if you want to use that.
