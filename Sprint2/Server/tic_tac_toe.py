@@ -1,93 +1,153 @@
-class TicTacToe:
-    def __init__(self):
-        # Initialize the grid with blank spaces
-        self.symbol_list = [" "] * 9
-        self.current_player = 'X'  # Player X starts
+"""
+Tic Tac Toe
+"""
+
+class TicTacToe():
+
+    def __init__(self, player_symbol):
+        # initialize the list of symbols
+        self.symbol_list = []
+
+        # defines all nine symbols; all start off as blank  
+        for i in range(9):
+            self.symbol_list.append(" ") 
+
+        # initializes the player symbol
+        self.player_symbol = player_symbol
+
 
     def restart(self):
-        # Clear the grid for a new game
-        self.symbol_list = [" "] * 9
-        self.current_player = 'X'  # Reset to player X
+        # clears the grid 
+        for i in range(9):
+            self.symbol_list[i] = " "
+
 
     def draw_grid(self):
+        # display the column headers
         print("\n       A   B   C\n")
         
-        # Display the rows with current symbols
-        for row in range(3):
-            row_string = f"   {row + 1}   " + " ║ ".join(self.symbol_list[row * 3: row * 3 + 3])
-            print(row_string)
-            if row < 2:
-                print("      ═══╬═══╬═══")
-        print("\n")
+        # display first row 
+        row_one = "   1   " + self.symbol_list[0]
+        row_one += " ║ " + self.symbol_list[1]
+        row_one += " ║ " + self.symbol_list[2]
+        print(row_one)
+
+        # display divider
+        print("      ═══╬═══╬═══")
+
+        # display second row 
+        row_two = "   2   " + self.symbol_list[3]
+        row_two += " ║ " + self.symbol_list[4]
+        row_two += " ║ " + self.symbol_list[5]
+        print(row_two)
+
+        # display divider
+        print("      ═══╬═══╬═══")
+
+        # display third and last row 
+        row_three = "   3   " + self.symbol_list[6]
+        row_three += " ║ " + self.symbol_list[7]
+        row_three += " ║ " + self.symbol_list[8]
+        print(row_three, "\n")
+
 
     def edit_square(self, grid_coord):
-        # Convert coordinates such as "1A" to "A1"
+        # swamps coordinates such as "1A" to "A1"
         if grid_coord[0].isdigit():
             grid_coord = grid_coord[1] + grid_coord[0]
 
-        col = grid_coord[0].upper()
-        row = int(grid_coord[1]) - 1
+        # divides the coordinate 
+        col = grid_coord[0].capitalize()
+        row = grid_coord[1]
 
-        # Convert "A1" to index
-        grid_index = (row * 3) + (ord(col) - ord('A'))
+        # converts "A1" to 0, "C3" to 8, and so forth 
+        grid_index = 0
 
-        # Check if the square is empty
+        if row == "1":
+            if col == "A":
+                grid_index = 0
+            elif col == "B":
+                grid_index = 1
+            elif col == "C":
+                grid_index = 2
+        elif row == "2":
+            if col == "A":
+                grid_index = 3
+            elif col == "B":
+                grid_index = 4
+            elif col == "C":
+                grid_index = 5
+        elif row == "3":
+            if col == "A":
+                grid_index = 6
+            elif col == "B":
+                grid_index = 7
+            elif col == "C":
+                grid_index = 8
+
         if self.symbol_list[grid_index] == " ":
-            self.symbol_list[grid_index] = self.current_player
-            return True
-        return False
+            self.symbol_list[grid_index] = self.player_symbol
+
+
+    def update_symbol_list(self, new_symbol_list):
+        for i in range(9):
+            self.symbol_list[i] = new_symbol_list[i]
+
 
     def did_win(self, player_symbol):
-        # Winning combinations
-        winning_combinations = [
-            [0, 1, 2],  # Top row
-            [3, 4, 5],  # Middle row
-            [6, 7, 8],  # Bottom row
-            [0, 3, 6],  # Left column
-            [1, 4, 7],  # Middle column
-            [2, 5, 8],  # Right column
-            [0, 4, 8],  # Diagonal top-left to bottom-right
-            [2, 4, 6]   # Diagonal top-right to bottom-left
-        ]
+        # local variable to replace unweildy self.symbol_list
+        g = []
+        for i in range(9):
+            g.append(self.symbol_list[i])
 
-        for combo in winning_combinations:
-            if all(self.symbol_list[i] == player_symbol for i in combo):
-                return True
+        # likewise to replace self.player_symbol 
+        sym = player_symbol
+
+        # check top row 
+        if g[0] == sym and g[1] == sym and g[2] == sym:
+            return True
+
+        # check middle row
+        elif g[3] == sym and g[4] == sym and g[5] == sym:
+            return True
+        
+        # check bottom row 
+        elif g[6] == sym and g[7] == sym and g[8] == sym:
+            return True 
+
+        # check left column 
+        elif g[0] == sym and g[3] == sym and g[6] == sym:
+            return True 
+
+        # check middle column 
+        elif g[1] == sym and g[4] == sym and g[7] == sym:
+            return True 
+
+        # check right column 
+        elif g[2] == sym and g[5] == sym and g[8] == sym:
+            return True
+
+        # check top-right to bottom-left 
+        elif g[2] == sym and g[4] == sym and g[6] == sym:
+            return True 
+
+        # check top-left to bottom-right 
+        elif g[0] == sym and g[4] == sym and g[8] == sym:
+            return True 
+
+        # didn't win... yet! 
         return False
 
+
     def is_draw(self):
-        return " " not in self.symbol_list and not self.did_win('X') and not self.did_win('O')
+        # see if all the spaces are used up 
+        num_blanks = 0
+        for i in range(9):
+                if self.symbol_list[i] == " ":
+                    num_blanks += 1
 
-    def switch_player(self):
-        self.current_player = 'O' if self.current_player == 'X' else 'X'
-
-    def play_game(self):
-        while True:
-            self.draw_grid()
-            print(f"Player {self.current_player}, enter your move (e.g., '1A' for row 1, column A):")
-            move = input().strip()
-
-            if len(move) != 2 or move[0] not in "123" or move[1].upper() not in "ABC":
-                print("Invalid move. Please enter a valid coordinate (e.g., '1A').")
-                continue
-
-            if not self.edit_square(move):
-                print("That square is already taken. Try again.")
-                continue
-
-            if self.did_win(self.current_player):
-                self.draw_grid()
-                print(f"Player {self.current_player} wins!")
-                break
-
-            if self.is_draw():
-                self.draw_grid()
-                print("It's a draw!")
-                break
-
-            self.switch_player()
-
-# Example usage
-if __name__ == "__main__":
-    game = TicTacToe()
-    game.play_game()
+        # if the player didn't win and no spaces are left, it's a draw
+        if self.did_win(self.player_symbol) == False and num_blanks == 0:
+            return True
+        else:
+            return False
