@@ -43,6 +43,11 @@ class TicTacToeGame:
                 return True
         return False
 
+    def reset(self):
+        self.board = [" "] * 9
+        self.current_player = "X"
+        self.game_over = False
+
 
 def broadcast_message(message, clients):
     """Send a message to all connected clients."""
@@ -79,13 +84,24 @@ def handle_client(client_socket, game, clients, client_id, game_lock):
                     broadcast_message(f"\nGame Board:\n{board}\n", clients)
                     broadcast_message(response, clients)
                     if "wins" in response or "draw" in response:
-                        broadcast_message("Game Over!", clients)
+                        broadcast_message("Game Over! Would you like to play again? (yes/no)", clients)
                         print(f"\nFinal Board (Server Side):\n{board}\n")  # Display final board on the server
                         break
                 else:
                     client_socket.sendall(b"Waiting for opponent...\n")
             # Prevent spamming: add a small delay to avoid fast re-checking in case the opponent has not moved yet
             threading.Event().wait(1)
+
+        # Wait for the rematch option after the game is over
+        rematch_response = client_socket.recv(1024).decode().strip().lower()
+        if rematch_response == "yes":
+            game.reset()
+            broadcast_message("Rematch starting...\n", clients)
+            handle_client(client_socket, game, clients, client_id, game_lock)  # Restart the game
+        else:
+            broadcast_message("One of the players declined the rematch. Game over!\n", clients)
+            for client in clients:
+                client.close()
 
     finally:
         client_socket.close()
