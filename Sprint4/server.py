@@ -38,8 +38,10 @@ class TicTacToeGame:
             (0, 4, 8), (2, 4, 6)
         ]
         for combo in winning_combinations:
-            if (self.board[combo[0]] == self.board[combo[1]] ==
-                    self.board[combo[2]] != " "):
+            if (
+                self.board[combo[0]] == self.board[combo[1]] ==
+                self.board[combo[2]] != " "
+            ):
                 return True
         return False
 
@@ -49,13 +51,13 @@ class TicTacToeGame:
         self.game_over = False
 
 
-def broadcast_message(message, clients):
+def broadcast_message(message, clients):  
     """Send a message to all connected clients."""
-    for client in clients:
+    for client in clients[:]:  # Iterate over a copy to allow safe removal
         try:
             client.sendall(message.encode() + b"\n")
         except:
-            pass  # Ignore errors for disconnected clients
+            clients.remove(client)  # Remove disconnected clients
 
 
 def handle_client(client_socket, game, clients, client_id, game_lock):
@@ -66,8 +68,7 @@ def handle_client(client_socket, game, clients, client_id, game_lock):
             client_socket.sendall(b"You are Player O.\n")
 
         while not game.game_over:
-            with game_lock:
-                # Send board state and prompt for move only if it's the player's turn
+            with game_lock:  # Synchronize shared game state
                 if game.current_player == ("X" if client_id == 0 else "O"):
                     board = game.display_board()
                     client_socket.sendall(f"\nGame Board:\n{board}\nYour move (0-8): ".encode())
@@ -83,26 +84,26 @@ def handle_client(client_socket, game, clients, client_id, game_lock):
 
                     broadcast_message(f"\nGame Board:\n{board}\n", clients)
                     broadcast_message(response, clients)
-                    if "wins" in response or "draw" in response:
+                    if game.game_over:
                         broadcast_message("Game Over! Would you like to play again? (yes/no)", clients)
                         print(f"\nFinal Board (Server Side):\n{board}\n")  # Display final board on the server
                         break
                 else:
                     client_socket.sendall(b"Waiting for opponent...\n")
-            # Prevent spamming: add a small delay to avoid fast re-checking in case the opponent has not moved yet
-            threading.Event().wait(1)
 
-        # Wait for the rematch option after the game is over
+            threading.Event().wait(0.5)  
+
+        client_socket.sendall(b"Would you like to play again? (yes/no): ")  # Prompted individual clients
         rematch_response = client_socket.recv(1024).decode().strip().lower()
         if rematch_response == "yes":
-            game.reset()
-            broadcast_message("Rematch starting...\n", clients)
-            handle_client(client_socket, game, clients, client_id, game_lock)  # Restart the game
+            with game_lock:
+                if client_id == 0:  # prevent duplicate resets
+                    game.reset()
+                broadcast_message("Rematch starting...\n", clients)
         else:
             broadcast_message("One of the players declined the rematch. Game over!\n", clients)
-            for client in clients:
-                client.close()
-
+    except Exception as e:  
+        print(f"Error with client {client_id}: {e}")
     finally:
         client_socket.close()
 
@@ -117,14 +118,20 @@ def start_server(host="127.0.0.1", port=65431):
     clients = []
     client_id = 0
 
-    while len(clients) < 2:
-        client_socket, addr = server.accept()
-        print(f"Player {client_id + 1} connected from {addr}")
-        clients.append(client_socket)
-        threading.Thread(target=handle_client, args=(client_socket, game, clients, client_id, game_lock)).start()
-        client_id += 1
-
-    server.close()
+    try:  # shutdown handling
+        while len(clients) < 2:
+            client_socket, addr = server.accept()
+            print(f"Player {client_id + 1} connected from {addr}")
+            clients.append(client_socket)
+            threading.Thread(
+                target=handle_client,
+                args=(client_socket, game, clients, client_id, game_lock),
+                daemon=True  # threads to daemon mode for easier cleanup
+            ).start()
+            client_id += 1
+    finally:
+        server.close()
+        print("Server shutting down...")  # Added shutdown message
 
 
 if __name__ == "__main__":
