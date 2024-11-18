@@ -11,6 +11,7 @@ This is a simple Tic-Tac-Toe game implemented using Python and sockets.
 **Technologies used:**
 * Python
 * Sockets
+* *threads/locks
 
 **Additional resources:**
 * [Link to Python documentation]
@@ -21,3 +22,6 @@ This is a simple Tic-Tac-Toe game implemented using Python and sockets.
 Implementing Client and server services.
 
 Start server by running python/python3 server.py then run python/python3 client.py the test case for this will auto generate a response for you if you want to use that.
+
+**Sprint Four
+Adding play/rematch capability and overall rework of code.
