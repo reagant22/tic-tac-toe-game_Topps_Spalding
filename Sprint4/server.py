@@ -3,8 +3,52 @@ import threading
 
 
 class TicTacToeGame:
-    # No changes needed to the game logic class
-    ...
+    def __init__(self):
+        self.board = [" "] * 9
+        self.current_player = "X"
+        self.game_over = False
+
+    def display_board(self):
+        return (
+            f"{self.board[0]} | {self.board[1]} | {self.board[2]}\n"
+            "---------\n"
+            f"{self.board[3]} | {self.board[4]} | {self.board[5]}\n"
+            "---------\n"
+            f"{self.board[6]} | {self.board[7]} | {self.board[8]}"
+        )
+
+    def make_move(self, position):
+        if self.board[position] == " " and not self.game_over:
+            self.board[position] = self.current_player
+            if self.check_winner():
+                self.game_over = True
+                return f"Player {self.current_player} wins!"
+            elif " " not in self.board:
+                self.game_over = True
+                return "It's a draw!"
+            else:
+                self.current_player = "O" if self.current_player == "X" else "X"
+                return "Move accepted"
+        return "Invalid move"
+
+    def check_winner(self):
+        winning_combinations = [
+            (0, 1, 2), (3, 4, 5), (6, 7, 8),
+            (0, 3, 6), (1, 4, 7), (2, 5, 8),
+            (0, 4, 8), (2, 4, 6)
+        ]
+        for combo in winning_combinations:
+            if (
+                self.board[combo[0]] == self.board[combo[1]] ==
+                self.board[combo[2]] != " "
+            ):
+                return True
+        return False
+
+    def reset(self):
+        self.board = [" "] * 9
+        self.current_player = "X"
+        self.game_over = False
 
 
 def broadcast_message(message, clients):
