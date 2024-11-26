@@ -124,4 +124,24 @@ def start_server(port):
             client_socket, addr = server.accept()
             print(f"New connection from {addr}")
             clients.append(client_socket)
-    
+            client_id = len(clients) - 1
+            threading.Thread(
+                target=handle_client,
+                args=(client_socket, client_id, game, clients, game_lock),
+                daemon=True
+            ).start()
+
+            if len(clients) == 2:
+                print("Two players connected. Starting the game...")
+    except KeyboardInterrupt:
+        print("\nServer shutting down...")
+    finally:
+        server.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Tic Tac Toe Server")
+    parser.add_argument("-p", "--port", type=int, required=True, help="Port for the server to listen on")
+    args = parser.parse_args()
+
+    start_server(args.port)
