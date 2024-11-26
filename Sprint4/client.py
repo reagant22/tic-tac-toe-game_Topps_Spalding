@@ -9,7 +9,11 @@ def handle_server_messages(client):
             if not data:
                 print("Disconnected from server.")
                 break
-            print(data.strip())
+
+            # Process each message from the server
+            messages = data.strip().split("\n")
+            for message in messages:
+                print(message)
         except ConnectionError:
             print("Connection lost.")
             break
@@ -22,13 +26,14 @@ def start_client(host="127.0.0.1", port=65431):
         print("Connected to the server!")
         
         # Start a thread to handle incoming server messages
-        threading.Thread(target=handle_server_messages, args=(client,), daemon=True).start()
+        server_thread = threading.Thread(target=handle_server_messages, args=(client,), daemon=True)
+        server_thread.start()
 
         while True:
-            # Send either game moves or chat messages
             user_input = input("Enter your move (0-8) or chat: ").strip()
             if user_input.lower() == "exit":
                 print("Exiting the game. Goodbye!")
+                client.sendall(b"exit")
                 break
             client.sendall(user_input.encode())
 

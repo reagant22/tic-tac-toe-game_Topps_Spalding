@@ -62,39 +62,37 @@ def broadcast_message(message, clients):
 
 def handle_client(client_socket, game, clients, client_id, game_lock):
     try:
-        if client_id == 0:
-            client_socket.sendall(b"Welcome to Tic Tac Toe! You are Player X.\n")
-        else:
-            client_socket.sendall(b"You are Player O.\n")
+        # Initial message to the player
+        client_socket.sendall(f"Welcome to Tic Tac Toe! You are Player {'X' if client_id == 0 else 'O'}.\n".encode())
 
-        while not game.game_over:
+        while True:
             with game_lock:
+                if game.game_over:
+                    break
                 if game.current_player == ("X" if client_id == 0 else "O"):
+                    # Notify the player about their turn
                     board = game.display_board()
                     client_socket.sendall(f"\nGame Board:\n{board}\nYour move (0-8): ".encode())
 
-                message = client_socket.recv(1024).decode().strip()
+                    # Receive and process the move
+                    message = client_socket.recv(1024).decode().strip()
+                    if not message.isdigit():
+                        broadcast_message(f"Player {client_id + 1} says: {message}", clients)
+                        continue
 
-                # Handle chat messages
-                if not message.isdigit():
-                    broadcast_message(f"Player {client_id + 1} says: {message}", clients)
-                    continue
-
-                # Handle game moves
-                position = int(message)
-                if game.current_player == ("X" if client_id == 0 else "O"):
+                    position = int(message)
                     response = game.make_move(position)
-                    board = game.display_board()
 
+                    # Broadcast updated board and game status
+                    board = game.display_board()
                     broadcast_message(f"\nGame Board:\n{board}\n", clients)
                     broadcast_message(response, clients)
-                    if game.game_over:
-                        broadcast_message("Game Over! Would you like to play again? (yes/no)", clients)
-                        break
-                else:
-                    client_socket.sendall(b"Waiting for opponent...\n")
 
-        client_socket.sendall(b"Would you like to play again? (yes/no): ")
+            if game.game_over:
+                break
+
+        # Handle rematch logic
+        client_socket.sendall(b"Game over! Would you like a rematch? (yes/no): ")
         rematch_response = client_socket.recv(1024).decode().strip().lower()
         if rematch_response == "yes":
             with game_lock:
