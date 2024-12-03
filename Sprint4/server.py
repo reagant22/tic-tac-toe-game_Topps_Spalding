@@ -83,7 +83,7 @@ def handle_client(client_socket, client_id, game, clients, game_lock):
                 client_socket.sendall("Your turn. Enter a position (0-8): ".encode())
                 position = client_socket.recv(1024).decode().strip()
                 if position.lower() == "exit":
-                    broadcast_message(f"Player {client_id + 1} has left the game. Ending session.", clients)
+                    broadcast_message(f"Player {client_id + 1} has left the game. Game will end.", clients)
                     break
                 try:
                     position = int(position)
@@ -103,9 +103,15 @@ def handle_client(client_socket, client_id, game, clients, game_lock):
     except Exception as e:
         print(f"Error with client {client_id + 1}: {e}")
     finally:
+        with game_lock:
+            if client_socket in clients:
+                clients.remove(client_socket)
         client_socket.close()
-        clients.remove(client_socket)
         print(f"Player {client_id + 1} disconnected.")
+        # Notify remaining client and reset game
+        if len(clients) == 1:
+            clients[0].sendall("The other player has disconnected. Waiting for a new player...\n".encode())
+            game.reset()
 
 
 def start_server(port):
