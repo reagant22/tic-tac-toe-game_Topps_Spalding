@@ -13,7 +13,7 @@ This is a simple Tic-Tac-Toe game implemented using Python and sockets.
 2. **Connect Clients:**
    - On each player’s machine, run the client:
      ```bash
-     python client.py -i SERVER_IP -p PORT
+     python client.py SERVER_IP PORT
      ```
 
 3. **Gameplay:**
