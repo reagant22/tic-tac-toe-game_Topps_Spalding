@@ -1,53 +1,74 @@
 import socket
+import sys
+import threading
 
-def start_client(host="127.0.0.1", port=65431):
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+class TicTacToeClient:
+    def __init__(self, server_ip, server_port):
+        self.server_ip = server_ip
+        self.server_port = server_port
+        self.client_socket = None
+        self.username = None
 
-    try:
-        client.connect((host, port))
-        print("Connected to the server!")
+    def connect_to_server(self):
+        """Connects to the Tic-Tac-Toe server."""
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            self.client_socket.connect((self.server_ip, self.server_port))
+            print("Connected to the server!")
+        except Exception as e:
+            print(f"Failed to connect to server: {e}")
+            sys.exit(1)
 
+    def handle_server_messages(self):
+        """Handles messages from the server (such as game board and instructions)."""
         while True:
-            data = client.recv(1024).decode()
-            if not data:
-                print("Disconnected from server.")
+            try:
+                data = self.client_socket.recv(1024).decode()
+                if not data:
+                    print("Disconnected from server.")
+                    break
+                print(data.strip())  # Print messages from the server properly formatted
+            except ConnectionError:
+                print("Connection lost.")
                 break
 
-            print(data.strip())
+    def prompt_for_move(self):
+        """Prompts the player for their move and sends it to the server."""
+        while True:
+            move = input("Your move (0-8) or chat: ")
+            if move.lower() == "exit":
+                self.client_socket.sendall("exit".encode())
+                print("Exiting game.")
+                break
+            try:
+                move = int(move)
+                if move < 0 or move > 8:
+                    print("Invalid input. Please enter a number between 0 and 8.")
+                else:
+                    self.client_socket.sendall(str(move).encode())
+            except ValueError:
+                # If the user inputs a string that's not a valid number, treat it as a chat message
+                self.client_socket.sendall(f"chat: {move}".encode())
 
-            # Allow either a game move or a chat message
-            if "Your move" in data or "Enter your move (0-8) or chat:" in data:
-                while True:
-                    message = input("Enter your move (0-8) or chat: ").strip()
-                    if message.isdigit() and int(message) in range(9):
-                        client.sendall(message.encode())  # Valid game move
-                        break
-                    elif message.startswith("/chat:"):
-                        client.sendall(message.encode())  # Chat message
-                        break
-                    else:
-                        print("Invalid input. Enter a number (0-8) or a chat message using '/chat:'.")
-            
-            elif "Would you like to play again?" in data:
-                while True:
-                    rematch = input("Do you want to play again? (yes/no): ").strip().lower()
-                    if rematch in {"yes", "no"}:
-                        client.sendall(rematch.encode())
-                        break
-                    print("Invalid input. Please enter 'yes' or 'no'.")
-                if rematch == "no":
-                    print("Thanks for playing! Goodbye!")
-                    break
+    def run(self):
+        """Main method to run the client."""
+        self.connect_to_server()
+        
+        # Start a thread to listen to the server messages
+        server_thread = threading.Thread(target=self.handle_server_messages)
+        server_thread.daemon = True
+        server_thread.start()
 
-    except ConnectionError as e:
-        print(f"Connection error: {e}")
-
-    except KeyboardInterrupt:
-        print("\nClient interrupted. Exiting...")
-
-    finally:
-        client.close()
-        print("Connection closed.")
+        # Now, prompt the user for their move or chat
+        self.prompt_for_move()
 
 if __name__ == "__main__":
-    start_client()
+    if len(sys.argv) != 3:
+        print("Usage: python3 client.py <server_ip> <server_port>")
+        sys.exit(1)
+
+    server_ip = sys.argv[1]
+    server_port = int(sys.argv[2])
+
+    client = TicTacToeClient(server_ip, server_port)
+    client.run()
