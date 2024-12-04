@@ -58,12 +58,15 @@ def handle_client(client_socket, client_id, game, clients, game_lock):
         client_socket.sendall(game.render_board().encode())
 
         while True:
-            # Wait for player's move
             client_socket.sendall("Your move (0-8): ".encode())
             position = client_socket.recv(1024).decode().strip()
 
+            if position.lower() == 'exit':  # Check if the player typed 'exit'
+                broadcast_message(f"Player {client_id + 1} has exited the game.\n", clients)
+                break
+
             if not position:
-                break  # Handle client disconnecting
+                break
 
             try:
                 position = int(position)
@@ -74,7 +77,6 @@ def handle_client(client_socket, client_id, game, clients, game_lock):
                 with game_lock:
                     if game.make_move(position):
                         broadcast_message(game.render_board(), clients)
-
                         if game.winner:
                             broadcast_message(f"Player {client_id + 1} ({game.current_player}) wins!\n", clients)
                             break
