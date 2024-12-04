@@ -1,5 +1,21 @@
 import socket
 import sys
+import threading
+
+def listen_to_server(client_socket):
+    """Listen to server messages and print them."""
+    try:
+        while True:
+            response = client_socket.recv(1024).decode()
+            if not response:
+                print("Server disconnected.")
+                break
+            print("\n" + response)
+    except ConnectionResetError:
+        print("\nServer connection lost.")
+    finally:
+        client_socket.close()
+        sys.exit(0)
 
 def main():
     if len(sys.argv) != 3:
@@ -13,28 +29,29 @@ def main():
         print("Invalid port number. Please provide a numeric value.")
         return
 
-    # Create a socket
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-    # Attempt to connect to the server
+
     try:
         client_socket.connect((server_ip, server_port))
     except ConnectionRefusedError:
         print("Unable to connect to the server. Please check the server's status.")
-        exit(1)
+        return
     except socket.gaierror:
         print("Invalid server IP address. Please check and try again.")
-        exit(1)
+        return
 
     print("Connected to the server!")
 
-    # Main game loop or further interactions go here
+
+    listener_thread = threading.Thread(target=listen_to_server, args=(client_socket,), daemon=True)
+    listener_thread.start()
+
     try:
         while True:
-            message = input("Enter your move (0-8) or chat: ")
+            message = input("Enter your move (0-8) or chat: ").strip()
+            if not message:
+                continue
             client_socket.sendall(message.encode())
-            response = client_socket.recv(1024).decode()
-            print(response)
     except KeyboardInterrupt:
         print("\nClient interrupted. Exiting...")
     finally:
