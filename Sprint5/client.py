@@ -42,7 +42,7 @@ def main():
 
     print("Connected to the server!")
 
-
+    # Start a listener thread
     listener_thread = threading.Thread(target=listen_to_server, args=(client_socket,), daemon=True)
     listener_thread.start()
 

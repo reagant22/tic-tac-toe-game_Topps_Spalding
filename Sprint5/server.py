@@ -1,6 +1,7 @@
 import socket
 import threading
 import logging
+import select
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -59,34 +60,30 @@ def handle_client(client_socket, client_id, game, clients, game_lock):
 
         while True:
             client_socket.sendall("Your move (0-8): ".encode())
-            position = client_socket.recv(1024).decode().strip()
+            ready_to_read, _, _ = select.select([client_socket], [], [], 1)  # non-blocking for 1 sec
+            if ready_to_read:
+                position = client_socket.recv(1024).decode().strip()
+                if not position:
+                    break
+                try:
+                    position = int(position)
+                    if position < 0 or position > 8:
+                        client_socket.sendall("Invalid position. Try again.\n".encode())
+                        continue
 
-            if position.lower() == 'exit':  # Check if the player typed 'exit'
-                broadcast_message(f"Player {client_id + 1} has exited the game.\n", clients)
-                break
-
-            if not position:
-                break
-
-            try:
-                position = int(position)
-                if position < 0 or position > 8:
-                    client_socket.sendall("Invalid position. Try again.\n".encode())
-                    continue
-
-                with game_lock:
-                    if game.make_move(position):
-                        broadcast_message(game.render_board(), clients)
-                        if game.winner:
-                            broadcast_message(f"Player {client_id + 1} ({game.current_player}) wins!\n", clients)
-                            break
-                        elif game.is_draw():
-                            broadcast_message("The game is a draw!\n", clients)
-                            break
-                    else:
-                        client_socket.sendall("Position already taken. Try again.\n".encode())
-            except ValueError:
-                client_socket.sendall("Invalid input. Enter a number between 0-8.\n".encode())
+                    with game_lock:
+                        if game.make_move(position):
+                            broadcast_message(game.render_board(), clients)
+                            if game.winner:
+                                broadcast_message(f"Player {client_id + 1} ({game.current_player}) wins!\n", clients)
+                                break
+                            elif game.is_draw():
+                                broadcast_message("The game is a draw!\n", clients)
+                                break
+                        else:
+                            client_socket.sendall("Position already taken. Try again.\n".encode())
+                except ValueError:
+                    client_socket.sendall("Invalid input. Enter a number between 0-8.\n".encode())
     except (ConnectionResetError, BrokenPipeError):
         logging.debug(f"Player {client_id + 1} disconnected.")
     finally:
