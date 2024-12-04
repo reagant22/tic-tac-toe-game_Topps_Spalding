@@ -33,8 +33,10 @@ This is a simple Tic-Tac-Toe game implemented using Python and sockets.
 * *threads/locks
 
 **Additional resources:**
-* [Link to Python documentation]
-* [Link to sockets tutorial]
+* [https://codebricks.co.nz/python-tic-tac-toe-version8.]
+* [https://stackoverflow.com/questions/7749341/basic-python-client-socket-example]
+* [https://www.geeksforgeeks.org/socket-programming-python/]
+* [https://yasoob.me/2013/08/06/python-socket-network-programming/]
 
 
 **Sprint One
