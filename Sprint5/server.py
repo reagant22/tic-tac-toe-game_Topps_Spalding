@@ -61,6 +61,10 @@ def handle_client(client_socket, client_id, game, clients, game_lock):
             client_socket.sendall("Your move (0-8): ".encode())
             position = client_socket.recv(1024).decode().strip()
 
+            if position.lower() == 'exit':  # Check if the player typed 'exit'
+                broadcast_message(f"Player {client_id + 1} has exited the game.\n", clients)
+                break
+
             if not position:
                 break
 
