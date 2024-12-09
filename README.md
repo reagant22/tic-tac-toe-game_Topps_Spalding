@@ -24,8 +24,11 @@ This is a simple Tic-Tac-Toe game implemented using Python and sockets.
    - The first player to align three symbols in a row (horizontally, vertically, or diagonally) wins!
    - If all slots are filled without a winner, the game ends in a draw.
 
-4. **Exit:**
-   - Type `exit` to end the game.
+4. **Issues/Bugs:**
+   - Sometimes error if quick reset port will "be in use"
+   - Limitation: 0-9 only others will not work. Won't skip turn.
+   - If you try and go twice in a row you steal the other players turn.
+   - Want to add better your turn updates.
 
 **Technologies used:**
 * Python
