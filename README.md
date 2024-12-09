@@ -29,6 +29,16 @@ This is a simple Tic-Tac-Toe game implemented using Python and sockets.
    - Limitation: 0-9 only others will not work. Won't skip turn.
    - If you try and go twice in a row you steal the other players turn.
    - Want to add better your turn updates.
+  
+5. **Roadmap:**
+   - Implement rematch from sprint 4 as sprint 5 socket work messed up.
+   - I would've liked to implement a better GUI.
+   - Better turn handling.
+
+5. **Retrospective:**
+   - We got our connections to work pretty well so I was happy with that.
+   - Better teamwork could've been improved. Shea and I did a lot of sections on our own then convened at certain parts.
+   - We could've had better github etiquette too. 
 
 **Technologies used:**
 * Python
